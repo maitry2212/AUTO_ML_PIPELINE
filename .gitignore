@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# ML/Data
+mlruns/
+.dvc/
+models/model.pkl
+
+# OS
+.DS_Store
+Thumbs.db
