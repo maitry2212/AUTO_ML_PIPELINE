@@ -1,34 +1,57 @@
-import pandas as pd
+import os
+import joblib
 import mlflow
 import mlflow.sklearn
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-import joblib
-import os
+from sklearn.metrics import accuracy_score, r2_score
+from sklearn.pipeline import Pipeline
+from src.config import Config
+from src.model_selector import get_models
+from src.preprocessor import build_preprocessor
 
-def train_model(data_path):
-    df = pd.read_csv(data_path)
+def train(df, target_col, task):
 
-    X = df.iloc[:, :-1]
-    y = df.iloc[:, -1]
+    X = df.drop(columns=[target_col])
+    y = df[target_col]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=Config.TEST_SIZE,
+        random_state=Config.RANDOM_STATE
+    )
 
-    model = RandomForestClassifier()
-    model.fit(X_train, y_train)
+    models = get_models(task)
+    best_score = -1
+    best_pipeline = None
 
-    preds = model.predict(X_test)
-    acc = accuracy_score(y_test, preds)
+    for name, model in models.items():
 
-    mlflow.set_experiment("one_click_ml")
+        preprocessor = build_preprocessor(X)
 
+        pipeline = Pipeline([
+            ("preprocessor", preprocessor),
+            ("model", model)
+        ])
+
+        pipeline.fit(X_train, y_train)
+
+        preds = pipeline.predict(X_test)
+
+        if task == "classification":
+            score = accuracy_score(y_test, preds)
+        else:
+            score = r2_score(y_test, preds)
+
+        if score > best_score:
+            best_score = score
+            best_pipeline = pipeline
+
+    os.makedirs(Config.MODEL_DIR, exist_ok=True)
+    joblib.dump(best_pipeline, f"{Config.MODEL_DIR}/model.pkl")
+
+    mlflow.set_experiment(Config.EXPERIMENT_NAME)
     with mlflow.start_run():
-        mlflow.log_param("model", "RandomForest")
-        mlflow.log_metric("accuracy", acc)
-        mlflow.sklearn.log_model(model, "model")
+        mlflow.log_metric("best_score", best_score)
+        mlflow.sklearn.log_model(best_pipeline, "model")
 
-    os.makedirs("models", exist_ok=True)
-    joblib.dump(model, "models/model.pkl")
-
-    print("Training complete. Accuracy:", acc)
+    return best_score

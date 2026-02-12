@@ -1,24 +1,30 @@
 from fastapi import FastAPI, UploadFile, File
 import shutil
-import joblib
 import os
-from src.train import train_model
+from src.data_loader import load_data
+from src.validator import detect_target, detect_task
+from src.train import train
 
 app = FastAPI()
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    file_path = f"data/{file.filename}"
-    
-    with open(file_path, "wb") as buffer:
+async def upload(file: UploadFile = File(...)):
+
+    os.makedirs("data", exist_ok=True)
+    path = f"data/{file.filename}"
+
+    with open(path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    train_model(file_path)
+    df = load_data(path)
 
-    return {"message": "Model trained successfully!"}
+    target = detect_target(df)
+    task = detect_task(df[target])
 
+    score = train(df, target, task)
 
-@app.get("/predict")
-def predict():
-    model = joblib.load("models/model.pkl")
-    return {"message": "Model ready for predictions"}
+    return {
+        "message": "Training complete",
+        "task": task,
+        "score": score
+    }

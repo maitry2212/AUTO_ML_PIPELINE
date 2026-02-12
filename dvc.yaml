@@ -2,6 +2,8 @@ stages:
   train:
     cmd: python src/train.py
     deps:
+      - data/dataset.csv
+      - src/ 
       - src/train.py
       - data/
     outs:
