@@ -3,14 +3,6 @@ name: ML Pipeline CI
 on:
   push:
     branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latestname: ML Pipeline CI
-
-on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -39,25 +31,8 @@ jobs:
 
     - name: Run Training Pipeline
       run: |
-        python -m src.trainer || echo "Trainer executed"
+        python src/train.py || echo "Trainer executed"
 
     - name: Check FastAPI import
       run: |
         python -c "from app.main import app"
-
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-
-    - name: Run training test
-      run: |
-        echo "CI running successfully"
