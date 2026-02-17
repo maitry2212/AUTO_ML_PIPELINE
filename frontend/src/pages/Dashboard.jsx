@@ -1,85 +1,69 @@
 import React, { useState } from 'react';
 import FileUpload from '../components/FileUpload';
+import { usePipeline } from '../context/PipelineContext';
+import { uploadDataset, getModelSuggestions, getProjects } from '../services/api';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
-import ResultsCard from '../components/ResultsCard';
-import { uploadDataset } from '../services/api';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
-    const [phase, setPhase] = useState('upload'); // upload -> training -> results
-    const [results, setResults] = useState(null);
+    const { updateState } = usePipeline();
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-    const handleUpload = async (file) => {
-        setPhase('training');
+    const handleUpload = async (file, taskType, targetColumn) => {
+        setLoading(true);
         setError(null);
-
         try {
-            const data = await uploadDataset(file);
-            setResults(data);
-            setPhase('results');
+            const uploadRes = await uploadDataset(file, taskType, targetColumn);
+            const suggestionData = await getModelSuggestions();
+            const projectsData = await getProjects();
+
+            updateState({
+                projectId: uploadRes.project_id,
+                file: file,
+                task: taskType,
+                target: targetColumn,
+                suggestions: suggestionData.suggestions,
+                projects: projectsData,
+                edaData: null,
+                trainingResults: null
+            });
+
+            navigate('/eda'); // Start with EDA page
         } catch (err) {
             console.error(err);
-            setError("Failed to train the model. Please check the backend connection.");
-            setPhase('upload');
+            setError(err.response?.data?.detail || "Upload failed. Please check the backend connection.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleReset = () => {
-        setResults(null);
-        setPhase('upload');
-    };
+    if (loading) return <div className="py-20"><Loader message="Feeding data to the pipeline..." /></div>;
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-12 min-h-[600px] flex items-center justify-center">
-            <AnimatePresence mode="wait">
-                {phase === 'upload' && (
-                    <motion.div
-                        key="upload"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="w-full"
-                    >
-                        <div className="text-center mb-12">
-                            <h2 className="text-4xl font-bold mb-4">Train Your Model</h2>
-                            <p className="text-gray-400">Load your dataset to start the automated training pipeline.</p>
-                        </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full"
+            >
+                <div className="text-center mb-12">
+                    <h2 className="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                        Initiate Pipeline
+                    </h2>
+                    <p className="text-gray-400 text-lg">Load your dataset and watch the magic happen.</p>
+                </div>
 
-                        <FileUpload onUpload={handleUpload} isLoading={false} />
+                <FileUpload onUpload={handleUpload} isLoading={false} />
 
-                        {error && (
-                            <p className="text-red-400 text-center mt-6 bg-red-400/10 p-4 rounded-xl border border-red-400/20 max-w-md mx-auto">
-                                {error}
-                            </p>
-                        )}
-                    </motion.div>
+                {error && (
+                    <p className="text-red-400 text-center mt-8 bg-red-400/10 p-4 border border-red-400/20 rounded-2xl max-w-md mx-auto">
+                        {error}
+                    </p>
                 )}
-
-                {phase === 'training' && (
-                    <motion.div
-                        key="training"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex flex-col items-center"
-                    >
-                        <Loader message="Synthesizing features and training optimal model..." />
-                    </motion.div>
-                )}
-
-                {phase === 'results' && results && (
-                    <motion.div
-                        key="results"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="w-full"
-                    >
-                        <ResultsCard results={results} onReset={handleReset} />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            </motion.div>
         </div>
     );
 };

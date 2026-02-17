@@ -1,7 +1,7 @@
 import React from 'react';
 import HeroSection from '../components/HeroSection';
-import { motion } from 'framer-motion';
 import { Zap, Shield, BarChart3, Cloud } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const FeatureCard = ({ icon: Icon, title, desc }) => (
     <div className="glass p-8 rounded-3xl hover:bg-white/10 transition-all duration-300">
@@ -13,10 +13,11 @@ const FeatureCard = ({ icon: Icon, title, desc }) => (
     </div>
 );
 
-const LandingPage = ({ onGetStarted }) => {
+const LandingPage = () => {
+    const navigate = useNavigate();
     return (
         <div>
-            <HeroSection onGetStarted={onGetStarted} />
+            <HeroSection onGetStarted={() => navigate('/dashboard')} />
 
             <div className="max-w-7xl mx-auto px-6 py-24">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

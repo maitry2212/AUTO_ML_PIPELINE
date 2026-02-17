@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,16 +23,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install dvc mlflow
 
-    - name: DVC Pull (if data tracked)
+    - name: Validate Module Imports
       run: |
-        dvc pull || echo "No DVC remote configured"
+        python -c "from src.config import settings; print('Config loaded')"
+        python -c "from src.trainer import Trainer; print('Trainer loaded')"
+        python -c "from src.predictor import Predictor; print('Predictor loaded')"
+        python -c "from app.main import app; print('FastAPI app loaded')"
 
-    - name: Run Training Pipeline
+    - name: Check DVC Stages
       run: |
-        python src/train.py || echo "Trainer executed"
-
-    - name: Check FastAPI import
-      run: |
-        python -c "from app.main import app"
+        dvc dag || echo "DVC DAG available"

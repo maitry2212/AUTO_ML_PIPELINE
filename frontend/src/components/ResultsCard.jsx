@@ -4,6 +4,7 @@ import { CheckCircle2, TrendingUp, BarChart, Server, RefreshCw } from 'lucide-re
 
 const ResultsCard = ({ results, onReset }) => {
     const { task, score, message } = results;
+    const isClassification = task === 'classification';
 
     return (
         <motion.div
@@ -44,27 +45,31 @@ const ResultsCard = ({ results, onReset }) => {
                         <TrendingUp className="text-blue-400" />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-400 uppercase tracking-wider tracking-wider">Metric Score</p>
-                        <p className="text-xl font-bold">{(score * 100).toFixed(2)}%</p>
+                        <p className="text-sm text-gray-400 uppercase tracking-wider">Metric Score</p>
+                        <p className="text-xl font-bold">
+                            {isClassification ? `${(score * 100).toFixed(2)}%` : score.toFixed(4)}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            {/* Model Health Indicator */}
-            <div className="glass rounded-2xl p-8 mb-12 flex flex-col items-center">
-                <div className="flex justify-between items-center w-full mb-4">
-                    <span className="text-gray-400 font-medium">Model Confidence</span>
-                    <span className="font-bold text-primary">{(score * 100).toFixed(0)}%</span>
+            {/* Model Health Indicator (Only for classification or R2-like metrics) */}
+            {isClassification && (
+                <div className="glass rounded-2xl p-8 mb-12 flex flex-col items-center">
+                    <div className="flex justify-between items-center w-full mb-4">
+                        <span className="text-gray-400 font-medium">Model Confidence</span>
+                        <span className="font-bold text-primary">{(score * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="w-full bg-white/5 h-3 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${score * 100}%` }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                            className="h-full bg-gradient-to-r from-primary to-secondary"
+                        />
+                    </div>
                 </div>
-                <div className="w-full bg-white/5 h-3 rounded-full overflow-hidden">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${score * 100}%` }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                        className="h-full bg-gradient-to-r from-primary to-secondary"
-                    />
-                </div>
-            </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                 <button

@@ -52,9 +52,13 @@ const FileUpload = ({ onUpload, isLoading }) => {
         }
     };
 
+    const [taskType, setTaskType] = useState('classification');
+    const [targetColumn, setTargetColumn] = useState('');
+
     const removeFile = () => {
         setFile(null);
         setError(null);
+        setTargetColumn('');
     };
 
     return (
@@ -112,12 +116,57 @@ const FileUpload = ({ onUpload, isLoading }) => {
                             )}
                         </div>
 
+                        {/* Task Settings */}
+                        <div className="w-full space-y-6 mb-8 text-left bg-white/5 p-6 rounded-2xl border border-white/10">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">Task Type</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => setTaskType('classification')}
+                                        className={`py-3 rounded-xl border transition-all ${taskType === 'classification'
+                                            ? 'border-primary bg-primary/10 text-primary'
+                                            : 'border-white/10 text-gray-400 hover:border-white/20'
+                                            }`}
+                                    >
+                                        Classification
+                                    </button>
+                                    <button
+                                        onClick={() => setTaskType('regression')}
+                                        className={`py-3 rounded-xl border transition-all ${taskType === 'regression'
+                                            ? 'border-primary bg-primary/10 text-primary'
+                                            : 'border-white/10 text-gray-400 hover:border-white/20'
+                                            }`}
+                                    >
+                                        Regression
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">Target Column Name</label>
+                                <input
+                                    type="text"
+                                    value={targetColumn}
+                                    onChange={(e) => setTargetColumn(e.target.value)}
+                                    placeholder="e.g. price, species, survived"
+                                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-all"
+                                />
+                                <p className="text-xs text-gray-500 mt-2 italic">* Enter the exact name of your target column</p>
+                            </div>
+                        </div>
+
                         <button
-                            onClick={() => onUpload(file)}
+                            onClick={() => {
+                                if (!targetColumn) {
+                                    setError("Target column name is required.");
+                                    return;
+                                }
+                                onUpload(file, taskType, targetColumn);
+                            }}
                             disabled={isLoading}
-                            className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all ${isLoading
-                                    ? 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                    : 'bg-white text-black hover:bg-gray-200'
+                            className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all ${isLoading || !targetColumn
+                                ? 'bg-white/5 text-gray-500 cursor-not-allowed'
+                                : 'bg-white text-black hover:bg-gray-200'
                                 }`}
                         >
                             {isLoading ? (

@@ -1,0 +1,18 @@
+[
+    {
+        "project_id": "proj_6109b1ea",
+        "timestamp": "2026-02-17T14:36:04.496320",
+        "dataset_name": "ultimate_student_productivity_dataset_5000.csv",
+        "task_type": "regression",
+        "target": "exam_score",
+        "score": 25.01209098763931
+    },
+    {
+        "project_id": "proj_2128b6d2",
+        "timestamp": "2026-02-17T14:26:20.255214",
+        "dataset_name": "Salary_dataset.csv",
+        "task_type": "regression",
+        "target": "Salary",
+        "score": 55494098.131422095
+    }
+]

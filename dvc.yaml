@@ -1,10 +1,44 @@
 stages:
-  train:
-    cmd: python src/train.py
+  data_validation:
+    cmd: python pipelines/validation_stage.py
     deps:
-      - data/dataset.csv
-      - src/ 
-      - src/train.py
-      - data/
+      - data/raw_dataset.csv
+      - src/validator.py
+      - pipelines/validation_stage.py
     outs:
-      - models/model.pkl
+      - artifacts/val_status.txt
+
+  preprocessing:
+    cmd: python pipelines/preprocessing_stage.py
+    deps:
+      - data/raw_dataset.csv
+      - src/preprocessor.py
+      - pipelines/preprocessing_stage.py
+    outs:
+      - models/preprocessor.joblib
+
+  eda:
+    cmd: python pipelines/eda_stage.py
+    deps:
+      - data/raw_dataset.csv
+      - src/eda_engine.py
+      - pipelines/eda_stage.py
+    outs:
+      - artifacts/eda_report.json
+
+  training:
+    cmd: python pipelines/training_stage.py
+    deps:
+      - data/raw_dataset.csv
+      - models/preprocessor.joblib
+      - src/trainer.py
+      - pipelines/training_stage.py
+    outs:
+      - models/latest_model.pkl # Placeholder for stage tracking
+
+  evaluation:
+    cmd: python src/predictor.py
+    deps:
+      - src/predictor.py
+    metrics:
+      - artifacts/metrics.json

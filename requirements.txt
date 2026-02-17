@@ -1,8 +1,17 @@
-pandas
-scikit-learn
-mlflow
 fastapi
 uvicorn
+pandas
+numpy
+scikit-learn
+mlflow
 dvc
+plotly
 python-multipart
+pydantic
+pydantic-settings
+python-dotenv
+xgboost
 joblib
+matplotlib
+seaborn
+# Add any existing requirements that were missed

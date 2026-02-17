@@ -1,17 +1,41 @@
+import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+import joblib
+import os
+from src.config import settings
 
-def build_preprocessor(X):
+class DataPreprocessor:
+    def __init__(self):
+        self.preprocessor = None
 
-    numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
-    categorical_cols = X.select_dtypes(include=["object"]).columns
+    def build_pipeline(self, X: pd.DataFrame):
+        numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
+        categorical_features = X.select_dtypes(include=['object']).columns
 
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ("num", StandardScaler(), numeric_cols),
-            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols)
-        ]
-    )
+        numeric_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='median')),
+            ('scaler', StandardScaler())
+        ])
 
-    return preprocessor
+        categorical_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+            ('onehot', OneHotEncoder(handle_unknown='ignore'))
+        ])
+
+        self.preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', numeric_transformer, numeric_features),
+                ('cat', categorical_transformer, categorical_features)
+            ]
+        )
+        return self.preprocessor
+
+    def save(self, path: str):
+        joblib.dump(self.preprocessor, path)
+
+    @staticmethod
+    def load(path: str):
+        return joblib.load(path)

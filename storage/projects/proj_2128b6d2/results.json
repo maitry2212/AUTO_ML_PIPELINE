@@ -1,0 +1,9 @@
+{
+    "run_id": "db64c21f4db64f2e807f649b6b72e8a8",
+    "metrics": {
+        "mse": 55494098.131422095,
+        "r2": 0.8913575982179496
+    },
+    "duration": 0.3937113285064697,
+    "model_uri": "models:/m-ff08e051f400421aa9cc2e629dd0d1f6"
+}
