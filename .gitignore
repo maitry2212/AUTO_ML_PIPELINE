@@ -3,13 +3,43 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
+env/
 .env
+build/
+dist/
+*.egg-info/
 
-# ML/Data
+# ML/Data Tracking
 mlruns/
-.dvc/
-models/model.pkl
+mlartifacts/
+mlflow.db
+.dvc/config.local
+.dvc/tmp/
+.dvc/cache/
+artifacts/
+mlartifacts/
+storage/projects/*
 
-# OS
+# Data & Models (DVC handles these, but good to ignore local copies if not tracked)
+# data/*
+# !data/.gitkeep
+# models/*
+# !models/.gitkeep
+
+# Node/Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IDE & OS
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+
+# Project Specific
+logs/
+tmp/

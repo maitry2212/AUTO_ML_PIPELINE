@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ML & Data
+mlruns/
+mlartifacts/
+mlflow.db
+storage/projects/*
+data/raw_dataset.csv
+artifacts/*
+models/*
+
+# Frontend (Assuming separate deployment on Vercel)
+frontend/
+node_modules/
+
+# Version Control & IDEs
+.git/
+.github/
+.gitignore
+.dockerignore
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Specific
+.DS_Store
+Thumbs.db
