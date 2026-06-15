@@ -19,14 +19,25 @@ from src.history_manager import HistoryManager
 
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title=settings.PROJECT_NAME)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="1.0.0",
+    description="One-Click AutoML Pipeline API",
+)
+
+# =============================================================================
+# CORS — controlled by ALLOWED_ORIGINS env variable
+# In production: ALLOWED_ORIGINS=https://yourdomain.com
+# In development: ALLOWED_ORIGINS=http://localhost:5173
+# =============================================================================
+allowed_origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # In-memory storage for current session
@@ -39,7 +50,14 @@ current_session = {
 
 @app.get("/")
 async def root():
-    return {"message": f"Welcome to {settings.PROJECT_NAME} API"}
+    return {"message": f"Welcome to {settings.PROJECT_NAME} API", "status": "ok"}
+
+# =============================================================================
+# HEALTH CHECK — used by Docker, nginx, and load balancers
+# =============================================================================
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": settings.PROJECT_NAME}
 
 @app.post("/upload")
 async def upload_dataset(
