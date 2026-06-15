@@ -640,7 +640,7 @@ When creating the instance, add these Inbound Rules:
 
 ```bash
 # On your local machine:
-
+icacls "C:\Users\YourName\.ssh\my-key.pem" /grant:r "$($env:USERNAME):(R)"
 # Set correct permissions for your .pem key file (required by SSH)
 chmod 400 ml-pipeline-key.pem
 
